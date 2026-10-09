@@ -2,6 +2,10 @@
 
 Hafta 3: sol menü + içerik alanından oluşan boş iskelet. Her modül,
 geliştirileceği haftayı gösteren bir yer tutucu sayfa açar.
+Hafta 4: ana panelde veritabanı özet kartları (OzetServisi üzerinden).
+
+Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
+Servis nesnesi dışarıdan (main.py) verilir.
 """
 
 import tkinter as tk
@@ -9,6 +13,7 @@ from tkinter import ttk
 
 from backend import config
 from backend.services import modul_servisi
+from backend.services.ozet_servisi import OzetServisi
 
 RENK_UST = "#b71c1c"
 RENK_MENU = "#263238"
@@ -16,8 +21,9 @@ RENK_MENU_SECILI = "#37474f"
 
 
 class AnaPencere(tk.Tk):
-    def __init__(self) -> None:
+    def __init__(self, ozet_servisi: OzetServisi) -> None:
         super().__init__()
+        self._ozet_servisi = ozet_servisi
         self.title(config.UYGULAMA_ADI)
         self.geometry("1000x620")
         self.minsize(820, 520)
@@ -83,8 +89,9 @@ class AnaPencere(tk.Tk):
                       "dağıtımı planlayan masaüstü uygulaması.\n"
                       "Aşağıdaki tablo modüllerin geliştirme takvimini gösterir.",
                  font=("Segoe UI", 10)).pack(anchor="w", padx=24)
+        self._ozet_kartlari()
 
-        tablo = ttk.Treeview(self.icerik, columns=("hafta", "aciklama"), height=9)
+        tablo = ttk.Treeview(self.icerik, columns=("hafta", "aciklama"), height=7)
         tablo.heading("#0", text="Modül")
         tablo.heading("hafta", text="Hafta")
         tablo.heading("aciklama", text="Kapsam")
@@ -95,6 +102,29 @@ class AnaPencere(tk.Tk):
             tablo.insert("", tk.END, text=modul.ad, values=(modul.hafta, modul.aciklama))
         tablo.pack(fill=tk.BOTH, expand=True, padx=24, pady=16)
         self.durum.configure(text=f"Sürüm {config.SURUM}")
+
+    def _ozet_kartlari(self) -> None:
+        ozet = self._ozet_servisi.panel_ozeti()
+        satir = tk.Frame(self.icerik, bg="white")
+        satir.pack(fill=tk.X, padx=24, pady=(16, 0))
+        kartlar = (
+            ("Malzeme çeşidi", ozet.malzeme_cesidi, "#1565c0"),
+            ("Depo", ozet.depo, "#ef6c00"),
+            ("İhtiyaç noktası", ozet.ihtiyac_noktasi, "#2e7d32"),
+            ("Bekleyen talep", ozet.bekleyen_talep, "#c62828"),
+            ("Kritik stok", ozet.kritik_stok, "#6a1b9a"),
+        )
+        for baslik, deger, renk in kartlar:
+            kart = tk.Frame(satir, bg="#f5f5f5", highlightbackground=renk, highlightthickness=2)
+            kart.pack(side=tk.LEFT, expand=True, fill=tk.X, padx=(0, 10))
+            tk.Label(kart, text=str(deger), bg="#f5f5f5", fg=renk,
+                     font=("Segoe UI", 20, "bold")).pack(pady=(8, 0))
+            tk.Label(kart, text=baslik, bg="#f5f5f5", fg="#455a64",
+                     font=("Segoe UI", 9)).pack(pady=(0, 8))
+        if ozet.bos_mu:
+            tk.Label(self.icerik, bg="white", fg="#e65100", font=("Segoe UI", 9),
+                     text="Veritabanı boş. Örnek veri için: "
+                          "python -m backend.data.kurulum --ornek-veri").pack(anchor="w", padx=24, pady=(6, 0))
 
     def _yer_tutucu_sayfa(self, modul: modul_servisi.ModulBilgisi) -> None:
         tk.Label(self.icerik, text=modul.ad, bg="white",
