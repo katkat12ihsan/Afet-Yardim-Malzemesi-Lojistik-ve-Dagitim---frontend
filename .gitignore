@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Sanal ortam
+.venv/
+venv/
+env/
+
+# Gizli bilgiler (API anahtarları, parolalar) - ASLA depoya yüklenmez
+.env
+
+# Yerel veritabanı ve üretilen veri (baştaki / sadece kök klasörü hedefler;
+# backend/data paketi yanlışlıkla dışarıda kalmasın)
+/data/
+*.db
+*.sqlite3
+
+# Derleme çıktıları (PyInstaller vb.)
+build/
+dist/
+*.spec
+
+# Editör / işletim sistemi
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini

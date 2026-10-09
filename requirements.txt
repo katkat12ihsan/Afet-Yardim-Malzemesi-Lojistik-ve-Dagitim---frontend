@@ -1,0 +1,4 @@
+# Hafta 3: yalnızca Python standart kütüphanesi kullanılıyor (tkinter, sqlite3).
+# Sonraki haftalarda eklenecek paketler buraya yazılacak, örn:
+# requests      # Hafta 9 - harita/rota API
+# tkintermapview # Hafta 9 - uygulama içi harita
