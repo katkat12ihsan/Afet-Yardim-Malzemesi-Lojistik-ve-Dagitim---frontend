@@ -1,4 +1,7 @@
-# Hafta 3: yalnızca Python standart kütüphanesi kullanılıyor (tkinter, sqlite3).
-# Sonraki haftalarda eklenecek paketler buraya yazılacak, örn:
-# requests      # Hafta 9 - harita/rota API
-# tkintermapview # Hafta 9 - uygulama içi harita
+# Backend paketi (varlık, iş ve veri erişim katmanları) ayrı depodadır; doğrudan GitHub'dan kurulur.
+# Geliştirirken iki depo yan yana klonluysa bunun yerine:
+#   pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
+afet-lojistik-backend @ git+https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend.git@main
+
+# Arayüz: Tkinter Python ile birlikte gelir, ek paket gerekmez.
+# Sonraki haftalarda eklenecek: tkintermapview (Hafta 9 - uygulama içi harita)
