@@ -15,8 +15,8 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 Gereksinim: Python 3.10+ ve Git (backend paketi GitHub'dan kurulur).
 
 ```bash
-git clone https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---fronted.git
-cd Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---fronted
+git clone https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend.git
+cd Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend
 python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
