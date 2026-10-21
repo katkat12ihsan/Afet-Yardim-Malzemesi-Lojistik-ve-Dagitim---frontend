@@ -14,14 +14,16 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 
 Gereksinim: Python 3.10+ ve Git (backend paketi GitHub'dan kurulur).
 
-**En kolay yol:** depoyu klonlayın ve **`baslat.bat`** dosyasına çift tıklayın. İlk çalıştırmada sanal ortamı (`.venv`) kurar, backend'i GitHub'dan yükler ve örnek veritabanını oluşturur; sonraki çalıştırmalarda doğrudan giriş ekranını açar.
+**İlk kurulum (bir kez):** depoyu klonlayın ve **`baslat.bat`** dosyasına çift tıklayın. Sanal ortamı (`.venv`) kurar, backend'i GitHub'dan yükler ve örnek veritabanını oluşturur.
+
+**Sonrasında:** uygulamayı istediğiniz yoldan açın: VS Code'da `main.py` → Run (▶), `python main.py` ya da `baslat.bat`. `main.py` genel Python ile açılırsa backend'i bulamaz ve kendini otomatik olarak `.venv` Python'u ile yeniden başlatır.
 
 | Dosya | Ne zaman |
 |---|---|
-| `baslat.bat` | Uygulamayı her açışta (çift tık) |
+| `baslat.bat` | İlk kurulum; istenirse her açışta da kullanılabilir |
 | `guncelle.bat` | Backend deposuna yeni hafta gönderildiğinde: backend'i son sürüme günceller, şemayı yükseltir |
 
-> **"Backend paketi bulunamadı" / `ModuleNotFoundError: No module named 'backend'` uyarısı:** `main.py` sanal ortam dışındaki bir Python ile açılmış demektir (dosyaya çift tıklama, `python main.py`, VS Code'da yanlış yorumlayıcı). Backend ayrı depodadır ve yalnızca `.venv` içine kuruludur. Çözüm: `baslat.bat` ile açın; VS Code'da *Python: Select Interpreter* → `.venv\Scripts\python.exe` seçin.
+> **Neden `.venv`?** Backend ayrı bir depodadır ve bu projenin `.venv` sanal ortamına paket olarak kuruludur; genel Python onu görmez. `main.py` bu yüzden açılışta backend'i bulamazsa `.venv` ile yeniden başlar. **"Backend paketi bulunamadı"** uyarısı yalnızca `.venv` hiç kurulmamışsa çıkar; çözüm `baslat.bat`'ı bir kez çalıştırmaktır.
 
 Elle kurulum (komut satırı):
 
