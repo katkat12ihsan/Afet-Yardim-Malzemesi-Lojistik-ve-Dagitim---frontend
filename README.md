@@ -8,7 +8,7 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 | **Frontend (bu depo)** | Tkinter arayüzü (`frontend/`) ve başlangıç noktası (`main.py`) |
 
 > Bilgisayar Uygulamaları I — Proje Tabanlı Öğrenme dersi projesi · İhsan Katkat (251161036)
-> Durum: **Hafta 5 — Kullanıcı yönetimi ve kimlik doğrulama**
+> Durum: **Hafta 6 — Envanter Yönetimi**
 
 ## Kurulum ve çalıştırma
 
@@ -40,6 +40,7 @@ pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
 | Ana panel | Veritabanından gelen özet kartları, modüllerin hafta planı ve kullanıcının erişimi |
 | Rol bazlı menü | Yetkisiz modüller "(kilitli)"; tıklanınca "Erişim engellendi" (karar backend'de verilir) |
 | Kullanıcılar | Yalnızca Yönetici |
+| Envanter Yönetimi (Hafta 6) | Stok durumu (Normal/Kritik/Tükendi), giriş/çıkış/sayım/kritik seviye pencereleri, hareket geçmişi, malzeme tanımları (Yönetici). Depo görevlisi yalnızca kendi deposunu görür. |
 
 | Rol | Erişebildiği modüller |
 |---|---|
@@ -47,7 +48,9 @@ pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
 | Kurum | Panel, İhtiyaç, Dağıtım, YZ Önerisi, Takip, Rapor |
 | Depo | Panel, Envanter, Bağış, Takip |
 
-![Depo rolü - yetkisiz erişim](https://raw.githubusercontent.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/main/docs/ekran-goruntuleri/hafta-05-depo-yetkisiz-erisim.png)
+![Envanter - stok durumu](https://raw.githubusercontent.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/main/docs/ekran-goruntuleri/hafta-06-envanter-stok-durumu.png)
+
+![Envanter - yetersiz stok uyarısı](https://raw.githubusercontent.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/main/docs/ekran-goruntuleri/hafta-06-yetersiz-stok-uyarisi.png)
 
 ## Klasör yapısı
 
@@ -56,10 +59,11 @@ main.py                  başlangıç noktası: giriş -> ana pencere -> çıkı
 frontend/
   giris_penceresi.py     giriş / kayıt penceresi
   main_window.py         ana pencere, rol bazlı menü, sayfalar
+  envanter_sayfasi.py    envanter: stok durumu, hareket geçmişi, malzeme tanımları
 requirements.txt         backend paketi (GitHub)
 ```
 
-**Kural:** Frontend veritabanına doğrudan erişmez; yalnızca `backend.services` (KimlikServisi, OzetServisi, modül planı) ve `backend.models` kullanır. Yetki kontrolü arayüzde değil backend'de yapılır; menüdeki kilit yalnızca kullanım kolaylığıdır.
+**Kural:** Frontend veritabanına doğrudan erişmez; yalnızca `backend.services` (KimlikServisi, OzetServisi, EnvanterServisi, modül planı) ve `backend.models` kullanır. Yetki kontrolü arayüzde değil backend'de yapılır; menüdeki kilit yalnızca kullanım kolaylığıdır.
 
 ## Dokümantasyon
 
@@ -67,6 +71,7 @@ Tüm proje dokümantasyonu backend deposundadır:
 [ER diyagramı](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/ER-Diyagrami.md) ·
 [Mimari](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/Mimari.md) ·
 [Güvenlik notu](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/Guvenlik-Notu.md) ·
+[Envanter](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/Envanter.md) ·
 [Haftalık raporlar](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/tree/main/docs/haftalik-raporlar) ·
 [Formlar](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/tree/main/docs/formlar) ·
 [AI kullanım günlüğü](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/ai-kullanim-gunlugu.md)

@@ -4,6 +4,7 @@ Hafta 3: sol menü + içerik alanından oluşan boş iskelet. Her modül,
 geliştirileceği haftayı gösteren bir yer tutucu sayfa açar.
 Hafta 4: ana panelde veritabanı özet kartları (OzetServisi üzerinden).
 Hafta 5: giriş yapan kullanıcı ve rolü, çıkış, rol bazlı menü, Kullanıcılar sayfası.
+Hafta 6: Envanter Yönetimi sayfası (frontend/envanter_sayfasi.py).
 
 Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
 Servis nesneleri ve oturum token'ı dışarıdan (main.py) verilir.
@@ -19,9 +20,11 @@ from tkinter import messagebox, ttk
 from backend import config
 from backend.services import modul_servisi
 from backend.services.hatalar import OturumGecersiz, YetkisizErisim
+from backend.services.envanter_servisi import EnvanterServisi
 from backend.services.kimlik_servisi import KimlikServisi
 from backend.services.ozet_servisi import OzetServisi
 from backend.services.yetki import erisebilir_mi
+from frontend.envanter_sayfasi import EnvanterSayfasi
 
 RENK_UST = "#b71c1c"
 RENK_MENU = "#263238"
@@ -30,10 +33,13 @@ RENK_MENU_KILITLI = "#78909c"
 
 
 class AnaPencere(tk.Tk):
-    def __init__(self, kimlik: KimlikServisi, ozet_servisi: OzetServisi, token: str) -> None:
+    def __init__(self, kimlik: KimlikServisi, ozet_servisi: OzetServisi,
+                 envanter_servisi: EnvanterServisi, token: str) -> None:
         super().__init__()
         self._kimlik = kimlik
         self._ozet_servisi = ozet_servisi
+        self._envanter_servisi = envanter_servisi
+        self._kapaniyor = False
         self._token = token
         self.cikis_yapildi = False           # main.py: True ise giriş ekranına döner
         self.kullanici = kimlik.oturum_dogrula(token)
@@ -100,9 +106,14 @@ class AnaPencere(tk.Tk):
         self.destroy()
 
     def _oturum_bitti(self, mesaj: str) -> None:
+        if self._kapaniyor:                  # aynı anda birden çok çağrı gelebilir
+            return
+        self._kapaniyor = True
         messagebox.showwarning("Oturum", mesaj, parent=self)
         self.cikis_yapildi = True            # giriş ekranına dön
-        self.destroy()
+        # Hemen değil, o anki olay işlendikten sonra kapat: açık sayfanın
+        # yarım kalan kodu silinmiş pencere bileşenlerine erişmesin.
+        self.after(0, self.destroy)
 
     # ------------------------------------------------------------ sayfalar
     def sayfa_goster(self, anahtar: str) -> None:
@@ -122,6 +133,10 @@ class AnaPencere(tk.Tk):
             self._panel_sayfasi()
         elif anahtar == "kullanicilar":
             self._kullanicilar_sayfasi()
+        elif anahtar == "envanter":
+            EnvanterSayfasi(self.icerik, self._envanter_servisi, self._token, self.kullanici,
+                            self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("Envanter Yönetimi")
         else:
             self._yer_tutucu_sayfa(modul_servisi.modul_bul(anahtar))
 
