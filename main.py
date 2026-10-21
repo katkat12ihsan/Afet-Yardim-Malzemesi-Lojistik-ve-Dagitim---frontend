@@ -5,6 +5,7 @@ Akış: Giriş penceresi -> (başarılı giriş) -> Ana pencere -> (Çıkış) -
 """
 
 from backend.data.database import baglanti_ac, migrasyonlari_uygula
+from backend.services.envanter_servisi import EnvanterServisi
 from backend.services.kimlik_servisi import KimlikServisi
 from backend.services.ozet_servisi import OzetServisi
 from frontend.giris_penceresi import GirisPenceresi
@@ -17,6 +18,7 @@ def main() -> None:
         migrasyonlari_uygula(baglanti)  # şema güncel değilse günceller
         kimlik = KimlikServisi(baglanti)
         ozet = OzetServisi(baglanti, kimlik)
+        envanter = EnvanterServisi(baglanti, kimlik)
 
         bilgi = ""
         if kimlik.ilk_kurulum_mu():
@@ -26,7 +28,7 @@ def main() -> None:
             token = GirisPenceresi(kimlik, bilgi).calistir()
             if token is None:            # giriş penceresi kapatıldı
                 break
-            pencere = AnaPencere(kimlik, ozet, token)
+            pencere = AnaPencere(kimlik, ozet, envanter, token)
             pencere.mainloop()
             if not pencere.cikis_yapildi:  # ana pencere X ile kapatıldı
                 kimlik.cikis_yap(token)
