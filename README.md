@@ -14,17 +14,27 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 
 Gereksinim: Python 3.10+ ve Git (backend paketi GitHub'dan kurulur).
 
+**En kolay yol:** depoyu klonlayın ve **`baslat.bat`** dosyasına çift tıklayın. İlk çalıştırmada sanal ortamı (`.venv`) kurar, backend'i GitHub'dan yükler ve örnek veritabanını oluşturur; sonraki çalıştırmalarda doğrudan giriş ekranını açar.
+
+| Dosya | Ne zaman |
+|---|---|
+| `baslat.bat` | Uygulamayı her açışta (çift tık) |
+| `guncelle.bat` | Backend deposuna yeni hafta gönderildiğinde: backend'i son sürüme günceller, şemayı yükseltir |
+
+> **"Backend paketi bulunamadı" / `ModuleNotFoundError: No module named 'backend'` uyarısı:** `main.py` sanal ortam dışındaki bir Python ile açılmış demektir (dosyaya çift tıklama, `python main.py`, VS Code'da yanlış yorumlayıcı). Backend ayrı depodadır ve yalnızca `.venv` içine kuruludur. Çözüm: `baslat.bat` ile açın; VS Code'da *Python: Select Interpreter* → `.venv\Scripts\python.exe` seçin.
+
+Elle kurulum (komut satırı):
+
 ```bash
 git clone https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend.git
 cd Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend
 python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-python -m backend.data.kurulum --ornek-veri
-python main.py
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+.venv\Scripts\python.exe -m backend.data.kurulum --ornek-veri
+.venv\Scripts\python.exe main.py
 ```
 
-`python -m backend.data.kurulum --ornek-veri` veritabanını oluşturur ve her rolden bir test kullanıcısı ekler: `yonetici`, `kurum1`, `depo1`. Parolalar backend deposunda, `backend/data/ornek_veri.py` → `KULLANICILAR` içindedir (yalnızca yerel demo içindir). Hiç kullanıcı yoksa kayıt ekranından ilk Yönetici hesabı açılabilir.
+Kurulum komutu (`backend.data.kurulum --ornek-veri`) veritabanını oluşturur ve her rolden bir test kullanıcısı ekler: `yonetici`, `kurum1`, `depo1`. Parolalar backend deposunda, `backend/data/ornek_veri.py` → `KULLANICILAR` içindedir (yalnızca yerel demo içindir). Hiç kullanıcı yoksa kayıt ekranından ilk Yönetici hesabı açılabilir.
 
 **İki depoyu birlikte geliştirirken:** depoları yan yana klonlayın ve backend'i düzenlenebilir kurun; backend'de yapılan değişiklik arayüze hemen yansır:
 
@@ -55,6 +65,8 @@ pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
 ## Klasör yapısı
 
 ```
+baslat.bat               çift tıkla aç (ilk seferde kurulum)
+guncelle.bat             backend'i GitHub'daki son sürüme güncelle
 main.py                  başlangıç noktası: giriş -> ana pencere -> çıkış -> giriş
 frontend/
   giris_penceresi.py     giriş / kayıt penceresi

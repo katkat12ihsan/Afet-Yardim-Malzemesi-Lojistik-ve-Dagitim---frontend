@@ -1,0 +1,2 @@
+# .bat dosyalari Windows satir sonuyla kalmali (aksi halde goto/etiketler bozulabilir)
+*.bat text eol=crlf
