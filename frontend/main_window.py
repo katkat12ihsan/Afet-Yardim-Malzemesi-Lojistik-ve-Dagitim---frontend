@@ -5,6 +5,7 @@ geliştirileceği haftayı gösteren bir yer tutucu sayfa açar.
 Hafta 4: ana panelde veritabanı özet kartları (OzetServisi üzerinden).
 Hafta 5: giriş yapan kullanıcı ve rolü, çıkış, rol bazlı menü, Kullanıcılar sayfası.
 Hafta 6: Envanter Yönetimi sayfası (frontend/envanter_sayfasi.py).
+Rol düzenleme: Kullanıcılar sayfası ayrı dosyada (frontend/kullanicilar_sayfasi.py).
 
 Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
 Servis nesneleri ve oturum token'ı dışarıdan (main.py) verilir.
@@ -14,7 +15,6 @@ asıl karar her sayfa açılışında backend'deki `modul_erisimi` ile verilir.
 """
 
 import tkinter as tk
-from datetime import datetime
 from tkinter import messagebox, ttk
 
 from backend import config
@@ -25,6 +25,7 @@ from backend.services.kimlik_servisi import KimlikServisi
 from backend.services.ozet_servisi import OzetServisi
 from backend.services.yetki import erisebilir_mi
 from frontend.envanter_sayfasi import EnvanterSayfasi
+from frontend.kullanicilar_sayfasi import KullanicilarSayfasi
 
 RENK_UST = "#b71c1c"
 RENK_MENU = "#263238"
@@ -132,7 +133,9 @@ class AnaPencere(tk.Tk):
         if anahtar == "panel":
             self._panel_sayfasi()
         elif anahtar == "kullanicilar":
-            self._kullanicilar_sayfasi()
+            KullanicilarSayfasi(self.icerik, self._kimlik, self._token, self.kullanici,
+                                self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("Kullanıcılar")
         elif anahtar == "envanter":
             EnvanterSayfasi(self.icerik, self._envanter_servisi, self._token, self.kullanici,
                             self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
@@ -202,26 +205,6 @@ class AnaPencere(tk.Tk):
             tk.Label(self.icerik, bg="white", fg="#e65100", font=("Segoe UI", 9),
                      text="Veritabanı boş. Örnek veri için: "
                           "python -m backend.data.kurulum --ornek-veri").pack(anchor="w", padx=24, pady=(6, 0))
-
-    def _kullanicilar_sayfasi(self) -> None:
-        self._baslik("Kullanıcılar", "Sistemdeki hesaplar ve rolleri. Parolalar hash'li saklanır, "
-                                     "burada gösterilmez.")
-        tablo = ttk.Treeview(self.icerik, show="headings", height=12,
-                             columns=("kadi", "ad", "rol", "depo", "son", "durum"))
-        for kolon, baslik, genislik in (("kadi", "Kullanıcı adı", 120), ("ad", "Ad soyad", 200),
-                                        ("rol", "Rol", 90), ("depo", "Depo", 200),
-                                        ("son", "Son giriş", 140), ("durum", "Durum", 80)):
-            tablo.heading(kolon, text=baslik)
-            tablo.column(kolon, width=genislik)
-        depolar = dict(self._kimlik.depo_secenekleri())
-        for k in self._kimlik.kullanicilari_listele(self._token):
-            kilitli = k.kilitli_bitis is not None and k.kilitli_bitis > datetime.now()
-            durum = "kilitli" if kilitli else ("aktif" if k.aktif else "pasif")
-            tablo.insert("", tk.END, values=(
-                k.kullanici_adi, k.ad_soyad, k.rol.value, depolar.get(k.depo_id, "-"),
-                k.son_giris.strftime("%d.%m.%Y %H:%M") if k.son_giris else "-", durum))
-        tablo.pack(fill=tk.BOTH, expand=True, padx=24, pady=16)
-        self._durum_yaz("Kullanıcılar")
 
     def _yer_tutucu_sayfa(self, modul: modul_servisi.ModulBilgisi) -> None:
         self._baslik(modul.ad, modul.aciklama)

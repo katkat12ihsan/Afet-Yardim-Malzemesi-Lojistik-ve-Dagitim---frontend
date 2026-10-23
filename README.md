@@ -51,7 +51,7 @@ pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
 | Giriş / kayıt | Parola alanı maskeli; hatalı girişte "Kullanıcı adı veya parola hatalı." |
 | Ana panel | Veritabanından gelen özet kartları, modüllerin hafta planı ve kullanıcının erişimi |
 | Rol bazlı menü | Yetkisiz modüller "(kilitli)"; tıklanınca "Erişim engellendi" (karar backend'de verilir) |
-| Kullanıcılar | Yalnızca Yönetici |
+| Kullanıcılar | Yalnızca Yönetici. Hesap listesi, **Rolü Düzenle** penceresi (Depo rolünde depo seçimi) ve son rol değişiklikleri. Kişi kendi rolünü değiştiremez. |
 | Envanter Yönetimi (Hafta 6) | Stok durumu (Normal/Kritik/Tükendi), giriş/çıkış/sayım/kritik seviye pencereleri, hareket geçmişi, malzeme tanımları (Yönetici). Depo görevlisi yalnızca kendi deposunu görür. |
 
 | Rol | Erişebildiği modüller |
@@ -74,6 +74,7 @@ frontend/
   giris_penceresi.py     giriş / kayıt penceresi
   main_window.py         ana pencere, rol bazlı menü, sayfalar
   envanter_sayfasi.py    envanter: stok durumu, hareket geçmişi, malzeme tanımları
+  kullanicilar_sayfasi.py  kullanıcılar: liste, rolü düzenle, rol değişikliği geçmişi
 requirements.txt         backend paketi (GitHub)
 ```
 
