@@ -6,6 +6,7 @@ Hafta 4: ana panelde veritabanı özet kartları (OzetServisi üzerinden).
 Hafta 5: giriş yapan kullanıcı ve rolü, çıkış, rol bazlı menü, Kullanıcılar sayfası.
 Hafta 6: Envanter Yönetimi sayfası (frontend/envanter_sayfasi.py).
 Rol düzenleme: Kullanıcılar sayfası ayrı dosyada (frontend/kullanicilar_sayfasi.py).
+Hafta 7: Bağış Girişi (frontend/bagis_sayfasi.py) ve İhtiyaç Eşleştirme (frontend/ihtiyac_sayfasi.py).
 
 Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
 Servis nesneleri ve oturum token'ı dışarıdan (main.py) verilir.
@@ -20,11 +21,15 @@ from tkinter import messagebox, ttk
 from backend import config
 from backend.services import modul_servisi
 from backend.services.hatalar import OturumGecersiz, YetkisizErisim
+from backend.services.bagis_servisi import BagisServisi
 from backend.services.envanter_servisi import EnvanterServisi
+from backend.services.eslestirme_servisi import EslestirmeServisi
 from backend.services.kimlik_servisi import KimlikServisi
 from backend.services.ozet_servisi import OzetServisi
 from backend.services.yetki import erisebilir_mi
+from frontend.bagis_sayfasi import BagisSayfasi
 from frontend.envanter_sayfasi import EnvanterSayfasi
+from frontend.ihtiyac_sayfasi import IhtiyacSayfasi
 from frontend.kullanicilar_sayfasi import KullanicilarSayfasi
 
 RENK_UST = "#b71c1c"
@@ -35,11 +40,14 @@ RENK_MENU_KILITLI = "#78909c"
 
 class AnaPencere(tk.Tk):
     def __init__(self, kimlik: KimlikServisi, ozet_servisi: OzetServisi,
-                 envanter_servisi: EnvanterServisi, token: str) -> None:
+                 envanter_servisi: EnvanterServisi, token: str,
+                 bagis_servisi: BagisServisi, eslestirme_servisi: EslestirmeServisi) -> None:
         super().__init__()
         self._kimlik = kimlik
         self._ozet_servisi = ozet_servisi
         self._envanter_servisi = envanter_servisi
+        self._bagis_servisi = bagis_servisi
+        self._eslestirme_servisi = eslestirme_servisi
         self._kapaniyor = False
         self._token = token
         self.cikis_yapildi = False           # main.py: True ise giriş ekranına döner
@@ -140,6 +148,14 @@ class AnaPencere(tk.Tk):
             EnvanterSayfasi(self.icerik, self._envanter_servisi, self._token, self.kullanici,
                             self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
             self._durum_yaz("Envanter Yönetimi")
+        elif anahtar == "bagis":
+            BagisSayfasi(self.icerik, self._bagis_servisi, self._token, self.kullanici,
+                         self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("Bağış Girişi")
+        elif anahtar == "ihtiyac":
+            IhtiyacSayfasi(self.icerik, self._eslestirme_servisi, self._token, self.kullanici,
+                           self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("İhtiyaç Eşleştirme")
         else:
             self._yer_tutucu_sayfa(modul_servisi.modul_bul(anahtar))
 

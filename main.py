@@ -47,7 +47,9 @@ def _backend_bulunamadi() -> None:
 
 try:
     from backend.data.database import baglanti_ac, migrasyonlari_uygula
+    from backend.services.bagis_servisi import BagisServisi
     from backend.services.envanter_servisi import EnvanterServisi
+    from backend.services.eslestirme_servisi import EslestirmeServisi
     from backend.services.kimlik_servisi import KimlikServisi
     from backend.services.ozet_servisi import OzetServisi
 except ModuleNotFoundError as hata:
@@ -67,6 +69,8 @@ def main() -> None:
         kimlik = KimlikServisi(baglanti)
         ozet = OzetServisi(baglanti, kimlik)
         envanter = EnvanterServisi(baglanti, kimlik)
+        bagis = BagisServisi(baglanti, kimlik, envanter)
+        eslestirme = EslestirmeServisi(baglanti, kimlik, envanter)
 
         bilgi = ""
         if kimlik.ilk_kurulum_mu():
@@ -76,7 +80,7 @@ def main() -> None:
             token = GirisPenceresi(kimlik, bilgi).calistir()
             if token is None:            # giriş penceresi kapatıldı
                 break
-            pencere = AnaPencere(kimlik, ozet, envanter, token)
+            pencere = AnaPencere(kimlik, ozet, envanter, token, bagis, eslestirme)
             pencere.mainloop()
             if not pencere.cikis_yapildi:  # ana pencere X ile kapatıldı
                 kimlik.cikis_yap(token)
