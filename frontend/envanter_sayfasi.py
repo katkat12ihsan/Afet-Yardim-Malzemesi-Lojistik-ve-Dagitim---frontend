@@ -116,9 +116,9 @@ class EnvanterSayfasi(tk.Frame):
         sekme = tk.Frame(defter, bg="white", padx=8, pady=8)
         defter.add(sekme, text="Stok Durumu")
         self.t_stok = self._tablo(sekme, (
-            ("malzeme", "Malzeme", 210, "w"), ("kategori", "Kategori", 100, "w"),
-            ("miktar", "Miktar", 80, "e"), ("birim", "Birim", 60, "w"),
-            ("kritik", "Kritik seviye", 90, "e"), ("durum", "Durum", 80, "center")))
+            ("malzeme", "Malzeme", 190, "w"), ("kategori", "Kategori", 90, "w"),
+            ("miktar", "Miktar", 70, "e"), ("rezerve", "Rezerve", 70, "e"), ("birim", "Birim", 55, "w"),
+            ("kritik", "Kritik seviye", 85, "e"), ("durum", "Durum", 75, "center")))
         self.t_stok.tag_configure("Kritik", background="#ffebee", foreground="#c62828")
         self.t_stok.tag_configure("Tükendi", background="#eceff1", foreground="#607d8b")
         self.t_stok.bind("<Double-1>", lambda _: self._hareket_penceresi("giris"))
@@ -143,7 +143,7 @@ class EnvanterSayfasi(tk.Frame):
         self._satirlar = {}
         for s in satirlar:
             iid = self.t_stok.insert("", tk.END, tags=(s.durum,), values=(
-                s.malzeme, s.kategori, sayi_yaz(s.miktar), s.birim,
+                s.malzeme, s.kategori, sayi_yaz(s.miktar), sayi_yaz(s.rezerve) if s.rezerve else "-", s.birim,
                 sayi_yaz(s.kritik_seviye) if s.kritik_seviye else "-", s.durum))
             self._satirlar[iid] = s
         kritik = sum(1 for s in satirlar if s.durum == "Kritik")
@@ -177,7 +177,9 @@ class EnvanterSayfasi(tk.Frame):
         p.configure(bg="white", padx=20, pady=16)
         p.geometry(f"+{self.winfo_rootx() + 220}+{self.winfo_rooty() + 90}")   # sayfanın üzerinde aç
         tk.Label(p, text=satir.malzeme, bg="white", font=("Segoe UI", 13, "bold")).pack(anchor="w")
-        tk.Label(p, text=f"{self.c_depo.get()}  ·  mevcut: {sayi_yaz(satir.miktar)} {satir.birim}",
+        rezerve = (f"  ·  rezerve {sayi_yaz(satir.rezerve)}, serbest {sayi_yaz(satir.serbest)}"
+                   if satir.rezerve else "")
+        tk.Label(p, text=f"{self.c_depo.get()}  ·  mevcut: {sayi_yaz(satir.miktar)} {satir.birim}{rezerve}",
                  bg="white", fg="#546e7a").pack(anchor="w", pady=(0, 10))
         tk.Label(p, text=etiket, bg="white").pack(anchor="w")
         e_miktar = ttk.Entry(p, width=32)
