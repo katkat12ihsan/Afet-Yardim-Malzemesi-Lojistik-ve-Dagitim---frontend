@@ -7,6 +7,7 @@ Hafta 5: giriş yapan kullanıcı ve rolü, çıkış, rol bazlı menü, Kullan�
 Hafta 6: Envanter Yönetimi sayfası (frontend/envanter_sayfasi.py).
 Rol düzenleme: Kullanıcılar sayfası ayrı dosyada (frontend/kullanicilar_sayfasi.py).
 Hafta 7: Bağış Girişi (frontend/bagis_sayfasi.py) ve İhtiyaç Eşleştirme (frontend/ihtiyac_sayfasi.py).
+Hafta 8: panelde modül durumu (Hazır/Kısmen/Planlandı); "Rota / Dağıtım Planı" Dağıtımlar sekmesini açar.
 
 Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
 Servis nesneleri ve oturum token'ı dışarıdan (main.py) verilir.
@@ -152,10 +153,13 @@ class AnaPencere(tk.Tk):
             BagisSayfasi(self.icerik, self._bagis_servisi, self._token, self.kullanici,
                          self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
             self._durum_yaz("Bağış Girişi")
-        elif anahtar == "ihtiyac":
+        elif anahtar in ("ihtiyac", "dagitim"):
+            # Hafta 8: dağıtım listesi ve durum güncelleme Hafta 7'de İhtiyaç sayfasında yapıldı;
+            # "Rota / Dağıtım Planı" menüsü yer tutucu yerine o sekmeyi açar (harita/rota Hafta 9).
             IhtiyacSayfasi(self.icerik, self._eslestirme_servisi, self._token, self.kullanici,
-                           self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
-            self._durum_yaz("İhtiyaç Eşleştirme")
+                           self._oturum_bitti, self._durum_yaz,
+                           ilk_sekme=1 if anahtar == "dagitim" else 0).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("Dağıtımlar (harita/rota Hafta 9)" if anahtar == "dagitim" else "İhtiyaç Eşleştirme")
         else:
             self._yer_tutucu_sayfa(modul_servisi.modul_bul(anahtar))
 
@@ -184,18 +188,24 @@ class AnaPencere(tk.Tk):
                      "yönetip ihtiyaç noktalarına dağıtımı planlayan masaüstü uygulaması.")
         self._ozet_kartlari()
 
-        tablo = ttk.Treeview(self.icerik, columns=("hafta", "erisim", "aciklama"), height=8)
+        tablo = ttk.Treeview(self.icerik, columns=("hafta", "durum", "erisim", "aciklama"), height=8)
         tablo.heading("#0", text="Modül")
         tablo.heading("hafta", text="Hafta")
+        tablo.heading("durum", text="Durum")
         tablo.heading("erisim", text="Erişim")
         tablo.heading("aciklama", text="Kapsam")
-        tablo.column("#0", width=180)
-        tablo.column("hafta", width=55, anchor="center")
-        tablo.column("erisim", width=70, anchor="center")
-        tablo.column("aciklama", width=430)
-        for modul in modul_servisi.modulleri_getir():
+        tablo.column("#0", width=160)
+        tablo.column("hafta", width=50, anchor="center")
+        tablo.column("durum", width=75, anchor="center")
+        tablo.column("erisim", width=55, anchor="center")
+        tablo.column("aciklama", width=380)
+        for durum, renk in ((modul_servisi.HAZIR, "#2e7d32"), (modul_servisi.KISMEN, "#ef6c00"),
+                            (modul_servisi.PLANLANDI, "#78909c")):
+            tablo.tag_configure(durum, foreground=renk)
+        for modul in sorted(modul_servisi.modulleri_getir(), key=lambda m: m.hafta):
             erisim = "var" if erisebilir_mi(self.kullanici, modul.anahtar) else "yok"
-            tablo.insert("", tk.END, text=modul.ad, values=(modul.hafta, erisim, modul.aciklama))
+            tablo.insert("", tk.END, text=modul.ad, tags=(modul.durum,),
+                         values=(modul.hafta, modul.durum, erisim, modul.aciklama))
         tablo.pack(fill=tk.BOTH, expand=True, padx=24, pady=16)
         self._durum_yaz()
 

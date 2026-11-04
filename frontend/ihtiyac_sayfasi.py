@@ -27,7 +27,8 @@ DURUM_RENGI = {"Bekliyor": "#c62828", "Kısmen karşılandı": "#ef6c00", "Karş
 
 class IhtiyacSayfasi(tk.Frame):
     def __init__(self, ust: tk.Widget, servis: EslestirmeServisi, token: str, kullanici: Kullanici,
-                 oturum_bitti: Callable[[str], None], durum_yaz: Callable[[str], None]) -> None:
+                 oturum_bitti: Callable[[str], None], durum_yaz: Callable[[str], None],
+                 ilk_sekme: int = 0) -> None:
         super().__init__(ust, bg="white")
         self._servis = servis
         self._token = token
@@ -45,6 +46,7 @@ class IhtiyacSayfasi(tk.Frame):
         self._talep_sekmesi()
         self._dagitim_sekmesi()
         self._denge_sekmesi()
+        self.defter.select(ilk_sekme)      # Hafta 8: "Rota / Dağıtım Planı" menüsü Dağıtımlar sekmesini açar
         self.defter.bind("<<NotebookTabChanged>>", lambda _: self.yenile())
         self.yenile()
 
