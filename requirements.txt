@@ -1,7 +1,8 @@
 # Backend paketi (varlık, iş ve veri erişim katmanları) ayrı depodadır; doğrudan GitHub'dan kurulur.
+# Etiketli sürüme sabitlenir (semantic versioning): vize ara sürümü v0.6.0. Yeni hafta etiketlenince güncellenir.
 # Geliştirirken iki depo yan yana klonluysa bunun yerine:
 #   pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
-afet-lojistik-backend @ git+https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend.git@main
+afet-lojistik-backend @ git+https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend.git@v0.6.0
 
 # Arayüz: Tkinter Python ile birlikte gelir, ek paket gerekmez.
 # Sonraki haftalarda eklenecek: tkintermapview (Hafta 9 - uygulama içi harita)
