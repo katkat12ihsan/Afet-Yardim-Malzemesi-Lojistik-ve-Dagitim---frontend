@@ -1,6 +1,6 @@
 @echo off
 rem Backend deposunda yeni hafta gonderildiginde calistirin:
-rem backend paketini GitHub'daki en son surume gunceller ve veritabani semasini yukseltir.
+rem backend paketini requirements.txt'teki surume (etiket, or. v0.6.0) gunceller ve veritabani semasini yukseltir.
 chcp 65001 >nul
 cd /d "%~dp0"
 
