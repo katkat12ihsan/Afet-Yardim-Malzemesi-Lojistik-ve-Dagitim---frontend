@@ -8,7 +8,7 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 | **Frontend (bu depo)** | Tkinter arayüzü (`frontend/`) ve başlangıç noktası (`main.py`) |
 
 > Bilgisayar Uygulamaları I — Proje Tabanlı Öğrenme dersi projesi · İhsan Katkat (251161036)
-> Durum: **Hafta 8 — VİZE ara sürümü [`v0.6.0`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.0)** (backend de `v0.6.0`) · [Değişiklik günlüğü](CHANGELOG.md)
+> Durum: **Hafta 8 — VİZE ara sürümü [`v0.6.0`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.0)** (backend de `v0.6.0`) · sonrası [`v0.6.1`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.1): Yönetici parola sıfırlama · [Değişiklik günlüğü](CHANGELOG.md)
 
 ## Kurulum ve çalıştırma
 
@@ -24,7 +24,7 @@ Gereksinim: Python 3.10+ ve Git (backend paketi GitHub'dan kurulur).
 | `guncelle.bat` | Backend deposuna yeni hafta gönderildiğinde: backend'i `requirements.txt`'teki sürüme günceller, şemayı yükseltir |
 | `demo.bat` | **Vize/sınıf demosu:** ayrı bir demo veritabanını (`%USERPROFILE%\AfetLojistik\demo.db`) her açılışta temiz örnek veriyle kurar. Gerçek veritabanına dokunmaz. Adımlar: [Demo senaryosu](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/Demo-Senaryosu.md) |
 
-> **Sürüm sabitleme:** `requirements.txt` backend'i etiketli sürümden kurar (`...backend.git@v0.6.0`). Böylece vize sürümünün kodu her kurulumda aynıdır; yeni hafta etiketlenince bu satır da güncellenir.
+> **Sürüm sabitleme:** `requirements.txt` backend'i etiketli sürümden kurar (`...backend.git@v0.6.1`). Böylece etiketli sürümün kodu her kurulumda aynıdır; yeni hafta etiketlenince bu satır da güncellenir.
 
 > **Neden `.venv`?** Backend ayrı bir depodadır ve bu projenin `.venv` sanal ortamına paket olarak kuruludur; genel Python onu görmez. `main.py` bu yüzden açılışta backend'i bulamazsa `.venv` ile yeniden başlar. **"Backend paketi bulunamadı"** uyarısı yalnızca `.venv` hiç kurulmamışsa çıkar; çözüm `baslat.bat`'ı bir kez çalıştırmaktır.
 
@@ -90,7 +90,7 @@ frontend/
   bagis_sayfasi.py       bağış girişi: yeni bağış, bağış geçmişi
   ihtiyac_sayfasi.py     ihtiyaç eşleştirme: talepler/öneri, dağıtımlar, stok–talep dengesi
   ortak.py               sayfaların ortak tablo/biçim yardımcıları
-requirements.txt         backend paketi (GitHub, etiketli sürüm @v0.6.0)
+requirements.txt         backend paketi (GitHub, etiketli sürüm @v0.6.1)
 ```
 
 **Kural:** Frontend veritabanına doğrudan erişmez; yalnızca `backend.services` (KimlikServisi, OzetServisi, EnvanterServisi, BagisServisi, EslestirmeServisi, modül planı) ve `backend.models` kullanır. Yetki kontrolü arayüzde değil backend'de yapılır; menüdeki kilit yalnızca kullanım kolaylığıdır.

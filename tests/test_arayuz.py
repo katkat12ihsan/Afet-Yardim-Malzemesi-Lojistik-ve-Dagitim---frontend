@@ -10,6 +10,7 @@ kullanıcının gerçek veritabanına dokunmaz.
 import os
 import tempfile
 import unittest
+from unittest import mock
 
 # Backend ayarları içe aktarılırken okunur: geçici veritabanını ÖNCE tanımla
 _KLASOR = tempfile.TemporaryDirectory()
@@ -20,6 +21,7 @@ from tkinter import TclError, ttk  # noqa: E402
 from backend import config  # noqa: E402
 from backend.data.database import baglanti_ac, islem, migrasyonlari_uygula  # noqa: E402
 from backend.data.ornek_veri import KULLANICILAR, ornek_kullanicilari_yukle, ornek_veri_yukle  # noqa: E402
+from backend.models import Rol  # noqa: E402
 from backend.services import modul_servisi  # noqa: E402
 from backend.services.bagis_servisi import BagisServisi  # noqa: E402
 from backend.services.envanter_servisi import EnvanterServisi  # noqa: E402
@@ -111,6 +113,43 @@ class ArayuzTesti(unittest.TestCase):
         durumlar = {tablo.item(i, "text"): tablo.set(i, "durum") for i in tablo.get_children()}
         self.assertEqual(durumlar["Envanter Yönetimi"], modul_servisi.HAZIR)
         self.assertEqual(durumlar["Rota / Dağıtım Planı"], modul_servisi.KISMEN)
+
+
+    def test_parola_sifirlama_ve_ilk_giriste_yeni_parola(self):
+        """Yönetici sıfırlar -> geçici parola bir kez görünür -> kullanıcı girişte kendi parolasını belirler."""
+        self.kimlik.kayit_ol("unutkan", "Unutkan Kişi", "Eski12345", "Eski12345", Rol.KURUM)
+        w = self.pencere("yonetici")
+        w.sayfa_goster("kullanicilar")
+        w.update()
+        sayfa = w.icerik.winfo_children()[0]
+        satir = next(i for i in sayfa.t_kullanici.get_children() if sayfa.t_kullanici.set(i, "kadi") == "unutkan")
+        sayfa.t_kullanici.selection_set(satir)
+        with mock.patch("frontend.kullanicilar_sayfasi.messagebox.askyesno", return_value=True):
+            sayfa._parola_sifirla()
+        gecici = sayfa.e_gecici.get()
+        sayfa.e_gecici.winfo_toplevel().destroy()
+        satir = next(i for i in sayfa.t_kullanici.get_children() if sayfa.t_kullanici.set(i, "kadi") == "unutkan")
+        self.assertEqual(sayfa.t_kullanici.set(satir, "durum"), "parola sıfırlandı")
+        self.assertEqual(sayfa.t_sifirlama.set(sayfa.t_sifirlama.get_children()[0], "kadi"), "unutkan")
+
+        g = GirisPenceresi(self.kimlik)
+
+        def kapat():
+            try:
+                g.destroy()
+            except TclError:          # başarılı girişte pencere kendini kapatır
+                pass
+        self.addCleanup(kapat)
+        g.e_kadi.insert(0, "unutkan")
+        g.e_parola.insert(0, gecici)
+        g._giris()                                   # oturum açılmaz, yeni parola formu gelir
+        self.assertIsNone(g.token)
+        g.y_parola.insert(0, "Yeni12345")
+        g.y_tekrar.insert(0, "Yeni12345")
+        kaydet = next(c for c in g.govde.winfo_children()
+                      if c.winfo_class() == "TButton" and "Kaydet" in c.cget("text"))
+        kaydet.invoke()
+        self.assertEqual(self.kimlik.oturum_dogrula(g.token).kullanici_adi, "unutkan")
 
 
 if __name__ == "__main__":

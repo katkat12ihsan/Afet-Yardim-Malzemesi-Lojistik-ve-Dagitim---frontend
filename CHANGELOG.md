@@ -2,6 +2,17 @@
 
 Sürüm numaraları [anlamsal sürümleme](https://semver.org/lang/tr/) kuralına uyar ve backend ile aynı numarayı kullanır: frontend `v0.6.0`, backend `v0.6.0` ile çalışır (`requirements.txt` bu etiketi kurar).
 
+## [0.6.1] — 17.11.2026 · Parola sıfırlama (etiket: `v0.6.1`, backend `v0.6.1`)
+
+### Eklenenler
+- **Kullanıcılar → Parolayı Sıfırla** (yalnızca Yönetici): onaydan sonra tek kullanımlık geçici parola üretilir ve yalnızca bir kez, ayrı bir pencerede gösterilir (Panoya Kopyala). Durum sütununda "parola sıfırlandı". Rol değişiklikleri ve parola sıfırlamaları alt kısımda iki sekmede.
+- **Giriş → Parolamı unuttum**: parolanın Yönetici tarafından sıfırlandığını anlatan bilgi (uygulama internetsiz çalıştığı için e-posta/SMS ile sıfırlama yok).
+- **Yeni Parola Belirle** formu: geçici parolayla girince oturum açılmaz, kullanıcı kendi parolasını belirler ve doğrudan giriş yapar.
+- Arayüz testi: sıfırla → geçici parola → ilk girişte yeni parola (toplam 6 test).
+
+### Değişenler
+- `requirements.txt` backend'i `@v0.6.1`'e sabitler.
+
 ## [0.6.0] — 04.11.2026 · Hafta 8 · VİZE ara sürümü (etiket: `v0.6.0`)
 
 ### Değişenler

@@ -3,6 +3,8 @@
 Hafta 5: kullanıcı listesi.
 Rol düzenleme: seçili kullanıcının rolünü (Depo rolünde bağlı deposunu da)
 değiştirme penceresi ve son rol değişiklikleri tablosu.
+Parola sıfırlama: parolasını unutan kullanıcıya tek kullanımlık geçici parola;
+geçici parola yalnızca bir kez, sıfırlama anında gösterilir.
 
 Kurallar (kendi rolünü değiştirememe, Depo için depo zorunluluğu, açık
 oturumların kapanması, geçmiş kaydı) backend'deki KimlikServisi.rol_degistir
@@ -36,32 +38,45 @@ class KullanicilarSayfasi(tk.Frame):
         tk.Label(self, bg="white", fg="#555", font=("Segoe UI", 10), justify=tk.LEFT, wraplength=720,
                  text="Sistemdeki hesaplar ve rolleri. Parolalar hash'li saklanır, burada gösterilmez. "
                       "Rolü değiştirmek için bir kullanıcı seçip \"Rolü Düzenle\"ye basın "
-                      "(ya da satıra çift tıklayın).").pack(anchor="w", padx=24)
+                      "(ya da satıra çift tıklayın). Parolasını unutan kullanıcı için "
+                      "\"Parolayı Sıfırla\".").pack(anchor="w", padx=24)
 
         self.t_kullanici = self._tablo((
-            ("kadi", "Kullanıcı adı", 120), ("ad", "Ad soyad", 190), ("rol", "Rol", 85),
-            ("depo", "Depo", 200), ("son", "Son giriş", 125), ("durum", "Durum", 70)), yukseklik=8)
+            ("kadi", "Kullanıcı adı", 100), ("ad", "Ad soyad", 175), ("rol", "Rol", 75),
+            ("depo", "Depo", 185), ("son", "Son giriş", 115), ("durum", "Durum", 115)), yukseklik=8)
         self.t_kullanici.tag_configure("ben", foreground="#1565c0")
         self.t_kullanici.bind("<Double-1>", lambda _: self._rol_penceresi())
 
         dugmeler = tk.Frame(self, bg="white")
         dugmeler.pack(fill=tk.X, padx=24, pady=(6, 0))
         ttk.Button(dugmeler, text="Rolü Düzenle", command=self._rol_penceresi).pack(side=tk.LEFT)
+        ttk.Button(dugmeler, text="Parolayı Sıfırla", command=self._parola_sifirla).pack(side=tk.LEFT, padx=(8, 0))
         tk.Label(dugmeler, bg="white", fg="#607d8b", font=("Segoe UI", 9),
                  text="Mavi satır: sizin hesabınız (kendi rolünüzü başka bir Yönetici değiştirebilir)."
                  ).pack(side=tk.LEFT, padx=12)
 
-        tk.Label(self, text="Son rol değişiklikleri", bg="white",
-                 font=("Segoe UI", 11, "bold")).pack(anchor="w", padx=24, pady=(14, 4))
+        # Denetim izi: iki geçmiş tek alanda, sekmeli (sayfa 1040x640 pencereye sığsın)
+        self.defter = ttk.Notebook(self)
+        self.defter.pack(fill=tk.BOTH, expand=True, padx=24, pady=(14, 12))
+        sekme_rol = tk.Frame(self.defter, bg="white")
+        sekme_parola = tk.Frame(self.defter, bg="white")
+        self.defter.add(sekme_rol, text="Son rol değişiklikleri")
+        self.defter.add(sekme_parola, text="Son parola sıfırlamaları")
         self.t_gecmis = self._tablo((
             ("tarih", "Tarih", 120), ("kadi", "Kullanıcı", 110), ("eski", "Eski rol", 150),
-            ("yeni", "Yeni rol", 150), ("degistiren", "Değiştiren", 110)), yukseklik=5)
+            ("yeni", "Yeni rol", 150), ("degistiren", "Değiştiren", 110)), yukseklik=4, ust=sekme_rol)
+        self.t_sifirlama = self._tablo((
+            ("tarih", "Tarih", 120), ("kadi", "Kullanıcı", 110), ("sifirlayan", "Sıfırlayan", 110)),
+            yukseklik=4, ust=sekme_parola)
         self.yenile()
 
     # ------------------------------------------------------------ yardımcı
-    def _tablo(self, kolonlar, yukseklik: int) -> ttk.Treeview:
-        cerceve = tk.Frame(self, bg="white")
-        cerceve.pack(fill=tk.BOTH, expand=True, padx=24, pady=(8, 0))
+    def _tablo(self, kolonlar, yukseklik: int, ust: Optional[tk.Widget] = None) -> ttk.Treeview:
+        cerceve = tk.Frame(ust or self, bg="white")
+        if ust is None:
+            cerceve.pack(fill=tk.BOTH, expand=True, padx=24, pady=(8, 0))
+        else:
+            cerceve.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
         tablo = ttk.Treeview(cerceve, columns=[k[0] for k in kolonlar], show="headings",
                              height=yukseklik, selectmode="browse")
         for anahtar, baslik, genislik in kolonlar:
@@ -95,6 +110,8 @@ class KullanicilarSayfasi(tk.Frame):
         for k in kullanicilar:
             kilitli = k.kilitli_bitis is not None and k.kilitli_bitis > datetime.now()
             durum = "kilitli" if kilitli else ("aktif" if k.aktif else "pasif")
+            if k.parola_degistirmeli:
+                durum = "parola sıfırlandı"
             iid = self.t_kullanici.insert("", tk.END, tags=("ben",) if k.id == self._kullanici.id else (), values=(
                 k.kullanici_adi, k.ad_soyad, k.rol.value, self._depolar.get(k.depo_id, "-"),
                 k.son_giris.strftime("%d.%m.%Y %H:%M") if k.son_giris else "-", durum))
@@ -106,6 +123,73 @@ class KullanicilarSayfasi(tk.Frame):
                 g["tarih"].replace("T", " ")[:16], g["kullanici_adi"],
                 self._rol_metni(g["eski_rol"], g["eski_depo"]),
                 self._rol_metni(g["yeni_rol"], g["yeni_depo"]), g["degistiren"]))
+
+        self.t_sifirlama.delete(*self.t_sifirlama.get_children())
+        for g in self._calistir(self._kimlik.parola_sifirlama_gecmisi, 20) or []:
+            self.t_sifirlama.insert("", tk.END, values=(
+                g["tarih"].replace("T", " ")[:16], g["kullanici_adi"], g["sifirlayan"]))
+
+    # --------------------------------------------------- parola sıfırlama
+    def _parola_sifirla(self) -> None:
+        secim = self.t_kullanici.selection()
+        if not secim:
+            messagebox.showinfo("Kullanıcı seçin", "Önce listeden bir kullanıcı seçin.", parent=self)
+            return
+        hedef = self._kayitlar[secim[0]]
+        if hedef.id == self._kullanici.id:
+            messagebox.showinfo("Kendi hesabınız",
+                                "Kendi parolanızı sıfırlayamazsınız; bunu başka bir Yönetici yapmalı.",
+                                parent=self)
+            return
+        if not messagebox.askyesno(
+                "Parolayı Sıfırla",
+                f"{hedef.ad_soyad} ({hedef.kullanici_adi}) için tek kullanımlık geçici parola üretilecek.\n\n"
+                "• Eski parolası artık geçmez, açık oturumları kapanır, hesap kilidi kalkar.\n"
+                "• İlk girişte kendi parolasını belirlemek zorunda olur.\n\n"
+                "Bunu yalnızca kişinin kimliğini doğruladıktan sonra yapın. Devam edilsin mi?",
+                icon="warning", parent=self):
+            return
+        gecici = self._calistir(self._kimlik.parola_sifirla, hedef.id)
+        if gecici is None:
+            return
+        self._durum_yaz(f"Parola sıfırlandı: {hedef.kullanici_adi}")
+        self.yenile()
+        self._gecici_parola_penceresi(hedef, gecici)
+
+    def _gecici_parola_penceresi(self, hedef: Kullanici, gecici: str) -> None:
+        """Geçici parola yalnızca burada, bir kez görünür; hiçbir yere kaydedilmez."""
+        p = tk.Toplevel(self)
+        p.title("Geçici Parola")
+        p.resizable(False, False)
+        p.transient(self.winfo_toplevel())
+        p.configure(bg="white", padx=20, pady=16)
+        p.geometry(f"+{self.winfo_rootx() + 200}+{self.winfo_rooty() + 90}")
+        tk.Label(p, text=f"{hedef.ad_soyad} ({hedef.kullanici_adi})", bg="white",
+                 font=("Segoe UI", 13, "bold")).pack(anchor="w")
+        tk.Label(p, text="Geçici parola:", bg="white", fg="#546e7a").pack(anchor="w", pady=(8, 2))
+        alan = tk.Entry(p, font=("Consolas", 16, "bold"), width=16, justify="center",
+                        relief=tk.SOLID, bd=1, readonlybackground="#fff8e1")
+        alan.insert(0, gecici)
+        alan.configure(state="readonly")
+        alan.pack(anchor="w", ipady=4)
+        self.e_gecici = alan
+        tk.Label(p, bg="white", fg="#607d8b", font=("Segoe UI", 9), wraplength=320, justify=tk.LEFT,
+                 text="Bu parolayı kullanıcıya kendiniz iletin. Pencere kapanınca bir daha gösterilmez "
+                      "(yalnızca hash'i saklanır). Kullanıcı bu parolayla girince kendi parolasını "
+                      "belirleyecek.").pack(anchor="w", pady=(8, 0))
+
+        def kopyala() -> None:
+            p.clipboard_clear()
+            p.clipboard_append(gecici)
+            l_kopya.configure(text="Panoya kopyalandı.")
+
+        satir = tk.Frame(p, bg="white")
+        satir.pack(fill=tk.X, pady=(12, 0))
+        l_kopya = tk.Label(satir, bg="white", fg="#2e7d32", font=("Segoe UI", 9))
+        l_kopya.pack(side=tk.LEFT)
+        ttk.Button(satir, text="Kapat", command=p.destroy).pack(side=tk.RIGHT)
+        ttk.Button(satir, text="Panoya Kopyala", command=kopyala).pack(side=tk.RIGHT, padx=8)
+        p.grab_set()
 
     # ----------------------------------------------------- rol penceresi
     def _rol_penceresi(self) -> None:
