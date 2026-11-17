@@ -4,6 +4,11 @@ Parola alanları '•' ile maskelenir. Parola frontend'de hiçbir yere
 kaydedilmez; doğrudan KimlikServisi'ne verilir ve orada hash'lenir.
 Başarılı girişte servis bir oturum token'ı döndürür; pencere kapanınca
 token main.py'ye iletilir.
+
+Parolası Yönetici tarafından sıfırlanan kullanıcı geçici parolayla girince
+backend oturum açmaz (ParolaDegistirilmeli); pencere "yeni parola belirle"
+formuna geçer. "Şifremi unuttum" e-posta/SMS ile yapılamadığı için (uygulama
+internetsiz çalışır) kullanıcı Yöneticiye yönlendirilir.
 """
 
 import tkinter as tk
@@ -12,7 +17,7 @@ from typing import Optional
 
 from backend import config
 from backend.models import Rol
-from backend.services.hatalar import IsKuraliHatasi
+from backend.services.hatalar import IsKuraliHatasi, ParolaDegistirilmeli
 from backend.services.kimlik_servisi import KimlikServisi
 
 RENK_UST = "#b71c1c"
@@ -67,17 +72,56 @@ class GirisPenceresi(tk.Tk):
         ttk.Button(self.govde, text="Giriş", command=self._giris).pack(fill=tk.X, pady=(18, 6), ipady=4)
         tk.Button(self.govde, text="Hesabın yok mu? Kayıt ol", relief=tk.FLAT, bd=0, bg="white",
                   fg="#1565c0", cursor="hand2", command=self._kayit_formu).pack()
+        tk.Button(self.govde, text="Parolamı unuttum", relief=tk.FLAT, bd=0, bg="white",
+                  fg="#1565c0", cursor="hand2", command=self._unuttum).pack(pady=(4, 0))
         self.bind("<Return>", lambda _: self._giris())
         self.e_kadi.focus_set()
 
+    def _unuttum(self) -> None:
+        self._mesaj_goster(
+            "Parolanızı Yönetici sıfırlar: Yöneticiye kimliğinizi doğrulatın, size tek kullanımlık "
+            "geçici bir parola versin. Geçici parolayla girdiğinizde kendi parolanızı belirlersiniz.",
+            hata=False)
+
     def _giris(self) -> None:
+        kadi, parola = self.e_kadi.get(), self.e_parola.get()
         try:
-            self.token = self._kimlik.giris_yap(self.e_kadi.get(), self.e_parola.get())
+            self.token = self._kimlik.giris_yap(kadi, parola)
+        except ParolaDegistirilmeli as bilgi:       # geçici parola doğru: yeni parola belirlenecek
+            self._parola_yenile_formu(kadi, parola, str(bilgi))
+            return
         except IsKuraliHatasi as hata:
             self.e_parola.delete(0, tk.END)
             self._mesaj_goster(str(hata))
             return
         self.destroy()
+
+    # ------------------------------------------------ YENİ PAROLA BELİRLE
+    def _parola_yenile_formu(self, kadi: str, gecici: str, bilgi: str) -> None:
+        self._temizle()
+        tk.Label(self.govde, text="Yeni Parola Belirle", bg="white",
+                 font=("Segoe UI", 15, "bold")).pack(anchor="w")
+        tk.Label(self.govde, text=f"Kullanıcı: {kadi.strip()}", bg="white", fg="#546e7a",
+                 font=("Segoe UI", 9)).pack(anchor="w")
+        self.y_parola = self._alan(f"Yeni parola (en az {config.PAROLA_MIN_UZUNLUK} karakter, harf ve rakam)",
+                                   gizli=True)
+        self.y_tekrar = self._alan("Yeni parola tekrar", gizli=True)
+
+        def kaydet() -> None:
+            try:
+                self.token = self._kimlik.parola_yenile(kadi, gecici, self.y_parola.get(), self.y_tekrar.get())
+            except IsKuraliHatasi as hata:
+                self._mesaj_goster(str(hata))
+                return
+            self.destroy()
+
+        ttk.Button(self.govde, text="Parolayı Kaydet ve Giriş Yap", command=kaydet
+                   ).pack(fill=tk.X, pady=(18, 6), ipady=4)
+        tk.Button(self.govde, text="Girişe dön", relief=tk.FLAT, bd=0, bg="white",
+                  fg="#1565c0", cursor="hand2", command=self._giris_formu).pack()
+        self.bind("<Return>", lambda _: kaydet())
+        self._mesaj_goster(bilgi, hata=False)
+        self.y_parola.focus_set()
 
     # ----------------------------------------------------------------- KAYIT
     def _kayit_formu(self) -> None:
