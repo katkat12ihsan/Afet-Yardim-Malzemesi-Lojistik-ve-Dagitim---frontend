@@ -28,6 +28,8 @@ from backend.services.envanter_servisi import EnvanterServisi  # noqa: E402
 from backend.services.eslestirme_servisi import EslestirmeServisi  # noqa: E402
 from backend.services.kimlik_servisi import KimlikServisi  # noqa: E402
 from backend.services.ozet_servisi import OzetServisi  # noqa: E402
+from backend.entegrasyon.harita_api import OrsIstemcisi  # noqa: E402
+from backend.services.rota_servisi import KAYNAK_TAHMIN, RotaServisi  # noqa: E402
 from backend.services.yetki import erisebilir_mi  # noqa: E402
 from frontend.giris_penceresi import GirisPenceresi  # noqa: E402
 from frontend.main_window import AnaPencere  # noqa: E402
@@ -48,8 +50,10 @@ class ArayuzTesti(unittest.TestCase):
             ornek_kullanicilari_yukle(cls.db)
         cls.kimlik = KimlikServisi(cls.db)
         env = EnvanterServisi(cls.db, cls.kimlik)
+        # Rota: anahtarsız istemci -> testler gerçek harita servisine gitmez (kuş uçuşu tahmin)
         cls.servisler = (OzetServisi(cls.db, cls.kimlik), env, BagisServisi(cls.db, cls.kimlik, env),
-                         EslestirmeServisi(cls.db, cls.kimlik, env))
+                         EslestirmeServisi(cls.db, cls.kimlik, env),
+                         RotaServisi(cls.db, cls.kimlik, OrsIstemcisi("")))
         cls.parola = {k: p for k, _, p, _, _ in KULLANICILAR}
 
     @classmethod
@@ -57,9 +61,9 @@ class ArayuzTesti(unittest.TestCase):
         cls.db.close()
 
     def pencere(self, kadi):
-        ozet, env, bagis, esl = self.servisler
+        ozet, env, bagis, esl, rota = self.servisler
         token = self.kimlik.giris_yap(kadi, self.parola[kadi])
-        w = AnaPencere(self.kimlik, ozet, env, token, bagis, esl)
+        w = AnaPencere(self.kimlik, ozet, env, token, bagis, esl, rota)
         def kapat():
             try:
                 w.destroy()
@@ -98,13 +102,21 @@ class ArayuzTesti(unittest.TestCase):
         kilitli = {a for a, b in w._menu_butonlari.items() if "(kilitli)" in b.cget("text")}
         self.assertEqual(kilitli, {"ihtiyac", "dagitim", "oneri", "rapor", "kullanicilar"})
 
-    def test_dagitim_menusu_dagitimlar_sekmesini_acar(self):
+    def test_rota_sayfasi_secilen_dagitimin_rotasini_cizer(self):
         w = self.pencere("kurum1")
         w.sayfa_goster("dagitim")
         w.update()
         sayfa = w.icerik.winfo_children()[0]
-        self.assertEqual(sayfa.defter.index("current"), 1)
-        self.assertGreater(len(sayfa.t_dagitim.get_children()), 0)
+        satirlar = sayfa.t_dagitim.get_children()
+        self.assertGreater(len(satirlar), 0)
+        self.assertIn("tanımlı değil", sayfa.l_servis.cget("text"))      # anahtarsız: uyarı görünür
+        sayfa.t_dagitim.selection_set(satirlar[0])
+        w.update()                                                        # <<TreeviewSelect>> -> rota
+        self.assertEqual(sayfa.son_rota.dagitim_id, int(satirlar[0]))
+        self.assertEqual(sayfa.son_rota.kaynak, KAYNAK_TAHMIN)
+        self.assertIn("km", sayfa.l_olcu.cget("text"))
+        self.assertIn("Kuş uçuşu tahmin", sayfa.l_uyari.cget("text"))
+        self.assertTrue(sayfa.tuval.find_all())                           # rota çizildi
 
     def test_panelde_modul_durumlari_gorunur(self):
         w = self.pencere("yonetici")
@@ -112,7 +124,7 @@ class ArayuzTesti(unittest.TestCase):
         tablo = next(c for c in w.icerik.winfo_children() if isinstance(c, ttk.Treeview))
         durumlar = {tablo.item(i, "text"): tablo.set(i, "durum") for i in tablo.get_children()}
         self.assertEqual(durumlar["Envanter Yönetimi"], modul_servisi.HAZIR)
-        self.assertEqual(durumlar["Rota / Dağıtım Planı"], modul_servisi.KISMEN)
+        self.assertEqual(durumlar["Rota / Dağıtım Planı"], modul_servisi.HAZIR)       # Hafta 9
 
 
     def test_parola_sifirlama_ve_ilk_giriste_yeni_parola(self):

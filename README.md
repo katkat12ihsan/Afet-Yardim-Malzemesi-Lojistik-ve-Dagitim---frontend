@@ -8,7 +8,7 @@ Bağış malzemelerinin envanterini yönetip ihtiyaç noktalarına dağıtımı 
 | **Frontend (bu depo)** | Tkinter arayüzü (`frontend/`) ve başlangıç noktası (`main.py`) |
 
 > Bilgisayar Uygulamaları I — Proje Tabanlı Öğrenme dersi projesi · İhsan Katkat (251161036)
-> Durum: **Hafta 8 — VİZE ara sürümü [`v0.6.0`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.0)** (backend de `v0.6.0`) · sonrası [`v0.6.1`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.1): Yönetici parola sıfırlama · [Değişiklik günlüğü](CHANGELOG.md)
+> Durum: **Hafta 9 — Harita / Rota API [`v0.7.0`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.7.0)** (backend de `v0.7.0`) · vize sürümü [`v0.6.0`](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---frontend/tree/v0.6.0) · [Değişiklik günlüğü](CHANGELOG.md)
 
 ## Kurulum ve çalıştırma
 
@@ -24,7 +24,7 @@ Gereksinim: Python 3.10+ ve Git (backend paketi GitHub'dan kurulur).
 | `guncelle.bat` | Backend deposuna yeni hafta gönderildiğinde: backend'i `requirements.txt`'teki sürüme günceller, şemayı yükseltir |
 | `demo.bat` | **Vize/sınıf demosu:** ayrı bir demo veritabanını (`%USERPROFILE%\AfetLojistik\demo.db`) her açılışta temiz örnek veriyle kurar. Gerçek veritabanına dokunmaz. Adımlar: [Demo senaryosu](https://github.com/katkat12ihsan/Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend/blob/main/docs/Demo-Senaryosu.md) |
 
-> **Sürüm sabitleme:** `requirements.txt` backend'i etiketli sürümden kurar (`...backend.git@v0.6.1`). Böylece etiketli sürümün kodu her kurulumda aynıdır; yeni hafta etiketlenince bu satır da güncellenir.
+> **Sürüm sabitleme:** `requirements.txt` backend'i etiketli sürümden kurar (`...backend.git@v0.7.0`). Böylece etiketli sürümün kodu her kurulumda aynıdır; yeni hafta etiketlenince bu satır da güncellenir.
 
 > **Neden `.venv`?** Backend ayrı bir depodadır ve bu projenin `.venv` sanal ortamına paket olarak kuruludur; genel Python onu görmez. `main.py` bu yüzden açılışta backend'i bulamazsa `.venv` ile yeniden başlar. **"Backend paketi bulunamadı"** uyarısı yalnızca `.venv` hiç kurulmamışsa çıkar; çözüm `baslat.bat`'ı bir kez çalıştırmaktır.
 
@@ -57,7 +57,8 @@ pip install -e ../Afet-Yardim-Malzemesi-Lojistik-ve-Dagitim---backend
 | Kullanıcılar | Yalnızca Yönetici. Hesap listesi, **Rolü Düzenle** penceresi (Depo rolünde depo seçimi) ve son rol değişiklikleri. Kişi kendi rolünü değiştiremez. |
 | Envanter Yönetimi (Hafta 6) | Stok durumu (Normal/Kritik/Tükendi), **Rezerve** sütunu (planlanmış dağıtımlara ayrılan; Envanter'den çıkarılamaz, Hafta 8), giriş/çıkış/sayım/kritik seviye pencereleri, hareket geçmişi, malzeme tanımları (Yönetici). Depo görevlisi yalnızca kendi deposunu görür. |
 | Bağış Girişi (Hafta 7) | Yeni bağış formu (bağışçı, depo, kalemler, son kullanma), bağış geçmişi ve kalemleri. Depo görevlisi yalnızca kendi deposuna girer. |
-| İhtiyaç Eşleştirme (Hafta 7) | Öncelik sıralı talepler, en yakın depodan öneri ve eksik uyarısı, dağıtımı planla; Dağıtımlar (Yola Çıkar / Teslim Edildi / İptal); Stok–Talep Dengesi. **Rota / Dağıtım Planı** menüsü doğrudan Dağıtımlar sekmesini açar (harita Hafta 9). |
+| İhtiyaç Eşleştirme (Hafta 7) | Öncelik sıralı talepler, en yakın depodan öneri ve eksik uyarısı, dağıtımı planla; Dağıtımlar (Yola Çıkar / Teslim Edildi / İptal); Stok–Talep Dengesi. |
+| Rota / Dağıtım Planı (Hafta 9) | Dağıtımlar; seçilen dağıtımın karayolu mesafesi, süresi ve rotası (OpenRouteService), Canvas'ta çizim. API anahtarı yoksa ya da servis hata verirse kuş uçuşu tahmin ve nedeni (turuncu). Yola Çıkar / Teslim Edildi / İptal. Anahtar: `HARITA_API_ANAHTARI` ortam değişkeni ya da `C:\Users\<kullanıcı>\AfetLojistik\.env` (ayrıntı: backend `docs/Rota-API.md`). |
 
 | Rol | Erişebildiği modüller |
 |---|---|
@@ -80,7 +81,7 @@ baslat.bat               çift tıkla aç (ilk seferde kurulum)
 guncelle.bat             backend'i requirements.txt'teki sürüme güncelle
 demo.bat                 vize demosu: ayrı demo veritabanı, temiz örnek veri
 CHANGELOG.md             sürümler ve değişiklikler
-tests/test_arayuz.py     arayüz duman testi: her rol, her sayfa, her sekme (5 test)
+tests/test_arayuz.py     arayüz testi: her rol/sayfa/sekme, parola sıfırlama, rota sayfası (6 test; harita servisine gitmez)
 main.py                  başlangıç noktası: giriş -> ana pencere -> çıkış -> giriş
 frontend/
   giris_penceresi.py     giriş / kayıt penceresi
@@ -89,8 +90,9 @@ frontend/
   kullanicilar_sayfasi.py  kullanıcılar: liste, rolü düzenle, rol değişikliği geçmişi
   bagis_sayfasi.py       bağış girişi: yeni bağış, bağış geçmişi
   ihtiyac_sayfasi.py     ihtiyaç eşleştirme: talepler/öneri, dağıtımlar, stok–talep dengesi
+  rota_sayfasi.py        rota / dağıtım planı: mesafe, süre, rota çizimi, durum düğmeleri
   ortak.py               sayfaların ortak tablo/biçim yardımcıları
-requirements.txt         backend paketi (GitHub, etiketli sürüm @v0.6.1)
+requirements.txt         backend paketi (GitHub, etiketli sürüm @v0.7.0)
 ```
 
 **Kural:** Frontend veritabanına doğrudan erişmez; yalnızca `backend.services` (KimlikServisi, OzetServisi, EnvanterServisi, BagisServisi, EslestirmeServisi, modül planı) ve `backend.models` kullanır. Yetki kontrolü arayüzde değil backend'de yapılır; menüdeki kilit yalnızca kullanım kolaylığıdır.

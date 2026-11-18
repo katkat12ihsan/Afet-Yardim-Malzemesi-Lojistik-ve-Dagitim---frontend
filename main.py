@@ -52,6 +52,7 @@ try:
     from backend.services.eslestirme_servisi import EslestirmeServisi
     from backend.services.kimlik_servisi import KimlikServisi
     from backend.services.ozet_servisi import OzetServisi
+    from backend.services.rota_servisi import RotaServisi
 except ModuleNotFoundError as hata:
     if not (hata.name or "").startswith("backend"):
         raise
@@ -71,6 +72,7 @@ def main() -> None:
         envanter = EnvanterServisi(baglanti, kimlik)
         bagis = BagisServisi(baglanti, kimlik, envanter)
         eslestirme = EslestirmeServisi(baglanti, kimlik, envanter)
+        rota = RotaServisi(baglanti, kimlik)       # anahtar: config.HARITA_API_ANAHTARI
 
         bilgi = ""
         if kimlik.ilk_kurulum_mu():
@@ -80,7 +82,7 @@ def main() -> None:
             token = GirisPenceresi(kimlik, bilgi).calistir()
             if token is None:            # giriş penceresi kapatıldı
                 break
-            pencere = AnaPencere(kimlik, ozet, envanter, token, bagis, eslestirme)
+            pencere = AnaPencere(kimlik, ozet, envanter, token, bagis, eslestirme, rota)
             pencere.mainloop()
             if not pencere.cikis_yapildi:  # ana pencere X ile kapatıldı
                 kimlik.cikis_yap(token)

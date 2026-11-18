@@ -2,6 +2,18 @@
 
 Sürüm numaraları [anlamsal sürümleme](https://semver.org/lang/tr/) kuralına uyar ve backend ile aynı numarayı kullanır: frontend `v0.6.0`, backend `v0.6.0` ile çalışır (`requirements.txt` bu etiketi kurar).
 
+## [0.7.0] — 18.11.2026 · Hafta 9 · Harita / Rota (etiket: `v0.7.0`, backend `v0.7.0`)
+
+### Eklenenler
+- **Rota / Dağıtım Planı** sayfası (`frontend/rota_sayfasi.py`): dağıtım listesi (mesafe/süre önbellekten, liste açılırken servise istek gitmez); seçilen dağıtımın karayolu mesafesi, süresi ve kaynağı; rota Canvas'a çizilir (harita karosu indirilmez, ek paket yok). Servis yoksa / hata verirse kesikli turuncu kuş uçuşu çizgisi ve nedeni. Yeniden Hesapla; Yola Çıkar / Teslim Edildi / İptal.
+- Sayfanın üstünde rota servisinin durumu (anahtar tanımlı mı; anahtarın kendisi gösterilmez).
+- Arayüz testi: rota sayfası (seçim → rota, anahtarsız tahmin uyarısı).
+
+### Değişenler
+- "Rota / Dağıtım Planı" menüsü İhtiyaç sayfasının sekmesi yerine kendi sayfasını açar; `IhtiyacSayfasi(ilk_sekme=...)` kaldırıldı. Panelde modül **Hazır**.
+- `main.py` `RotaServisi` oluşturur; `AnaPencere` onu alır.
+- `requirements.txt` backend'i `@v0.7.0`'a sabitler; Hafta 9 için planlanan `tkintermapview` gerekmedi.
+
 ## [0.6.1] — 17.11.2026 · Parola sıfırlama (etiket: `v0.6.1`, backend `v0.6.1`)
 
 ### Eklenenler

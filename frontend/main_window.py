@@ -8,6 +8,7 @@ Hafta 6: Envanter Yönetimi sayfası (frontend/envanter_sayfasi.py).
 Rol düzenleme: Kullanıcılar sayfası ayrı dosyada (frontend/kullanicilar_sayfasi.py).
 Hafta 7: Bağış Girişi (frontend/bagis_sayfasi.py) ve İhtiyaç Eşleştirme (frontend/ihtiyac_sayfasi.py).
 Hafta 8: panelde modül durumu (Hazır/Kısmen/Planlandı); "Rota / Dağıtım Planı" Dağıtımlar sekmesini açar.
+Hafta 9: "Rota / Dağıtım Planı" kendi sayfası (frontend/rota_sayfasi.py): harita/rota API.
 
 Frontend veritabanını tanımaz; yalnızca backend servislerini kullanır.
 Servis nesneleri ve oturum token'ı dışarıdan (main.py) verilir.
@@ -27,11 +28,13 @@ from backend.services.envanter_servisi import EnvanterServisi
 from backend.services.eslestirme_servisi import EslestirmeServisi
 from backend.services.kimlik_servisi import KimlikServisi
 from backend.services.ozet_servisi import OzetServisi
+from backend.services.rota_servisi import RotaServisi
 from backend.services.yetki import erisebilir_mi
 from frontend.bagis_sayfasi import BagisSayfasi
 from frontend.envanter_sayfasi import EnvanterSayfasi
 from frontend.ihtiyac_sayfasi import IhtiyacSayfasi
 from frontend.kullanicilar_sayfasi import KullanicilarSayfasi
+from frontend.rota_sayfasi import RotaSayfasi
 
 RENK_UST = "#b71c1c"
 RENK_MENU = "#263238"
@@ -42,13 +45,15 @@ RENK_MENU_KILITLI = "#78909c"
 class AnaPencere(tk.Tk):
     def __init__(self, kimlik: KimlikServisi, ozet_servisi: OzetServisi,
                  envanter_servisi: EnvanterServisi, token: str,
-                 bagis_servisi: BagisServisi, eslestirme_servisi: EslestirmeServisi) -> None:
+                 bagis_servisi: BagisServisi, eslestirme_servisi: EslestirmeServisi,
+                 rota_servisi: RotaServisi) -> None:
         super().__init__()
         self._kimlik = kimlik
         self._ozet_servisi = ozet_servisi
         self._envanter_servisi = envanter_servisi
         self._bagis_servisi = bagis_servisi
         self._eslestirme_servisi = eslestirme_servisi
+        self._rota_servisi = rota_servisi
         self._kapaniyor = False
         self._token = token
         self.cikis_yapildi = False           # main.py: True ise giriş ekranına döner
@@ -153,13 +158,14 @@ class AnaPencere(tk.Tk):
             BagisSayfasi(self.icerik, self._bagis_servisi, self._token, self.kullanici,
                          self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
             self._durum_yaz("Bağış Girişi")
-        elif anahtar in ("ihtiyac", "dagitim"):
-            # Hafta 8: dağıtım listesi ve durum güncelleme Hafta 7'de İhtiyaç sayfasında yapıldı;
-            # "Rota / Dağıtım Planı" menüsü yer tutucu yerine o sekmeyi açar (harita/rota Hafta 9).
+        elif anahtar == "ihtiyac":
             IhtiyacSayfasi(self.icerik, self._eslestirme_servisi, self._token, self.kullanici,
-                           self._oturum_bitti, self._durum_yaz,
-                           ilk_sekme=1 if anahtar == "dagitim" else 0).pack(fill=tk.BOTH, expand=True)
-            self._durum_yaz("Dağıtımlar (harita/rota Hafta 9)" if anahtar == "dagitim" else "İhtiyaç Eşleştirme")
+                           self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("İhtiyaç Eşleştirme")
+        elif anahtar == "dagitim":
+            RotaSayfasi(self.icerik, self._rota_servisi, self._eslestirme_servisi, self._token, self.kullanici,
+                        self._oturum_bitti, self._durum_yaz).pack(fill=tk.BOTH, expand=True)
+            self._durum_yaz("Rota / Dağıtım Planı")
         else:
             self._yer_tutucu_sayfa(modul_servisi.modul_bul(anahtar))
 
